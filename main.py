@@ -220,8 +220,8 @@ def toss():
             if time.time() - start_time > 3:
                 break
 
-        button("Home", WIDTH-200, HEIGHT-150, 100, 50, GREEN, RED, game_intro)
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro)
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
 
         pygame.display.update()
         clock.tick(15)
@@ -311,8 +311,8 @@ def end_game(user_won, draw=False):
         
         mute_buttons()
         
-        button("Play again!", WIDTH-200, HEIGHT-150, 100, 50, RED, GREEN, game)
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Play again!", WIDTH-150, HEIGHT-150, 100, 50, RED, GREEN, game)
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
 
         pygame.display.update()
         clock.tick(15)
@@ -342,8 +342,8 @@ def mid_game(runs, user_batting):
         if i % 2 == 0:
             text_objects(f'Press "ENTER" key to continue!', score_font, RED,(WIDTH//2, 450))
 
-        button("Home", WIDTH-200, HEIGHT-150, 100, 50, GREEN, RED, game_intro)
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro)
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
 
         i += 1
         pygame.display.update()
@@ -410,8 +410,9 @@ def set_vol():
 
         text_objects("Background music:", button_font, YELLOW, (vol_bar_x - 75, vol_bar_y + 7))
 
-        button("Home", WIDTH-200, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Back", WIDTH-390, HEIGHT-150, 100, 50, GREEN, RED, settings)
         # Create back button
 
         if change_vol and not muted:
@@ -427,8 +428,7 @@ def set_vol():
 def set_wickets():
     global events, window, full_screen
 
-    while True:
-        pass
+    pass
 
 def settings():
     global events, window, full_screen
@@ -443,8 +443,8 @@ def settings():
         button("Volume", (WIDTH//2) -50, (HEIGHT//2) - 120, 100, 50, YELLOW, GREEN, set_vol)
         button("Wickets", (WIDTH//2) - 50, (HEIGHT//2) - 60, 100, 50, YELLOW, GREEN, set_wickets)
 
-        button("Home", WIDTH-200, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
 
         pygame.display.update()
         clock.tick(15)
@@ -478,8 +478,8 @@ def game_loop():
         mute_buttons()
         draw()    
 
-        button("Home", WIDTH-200, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
-        button("EXIT", WIDTH-400, HEIGHT-150, 100, 50, GREEN, RED, quit_game)   
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)   
         
         update_score()
 
