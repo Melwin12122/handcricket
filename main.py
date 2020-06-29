@@ -1,6 +1,3 @@
-# Create back button
-# this is a test
-# added back
 import pygame
 import sys 
 import time
@@ -68,9 +65,13 @@ unmute_icon = pygame.image.load(os.path.join("images", "unmute.jpg"))
 pygame.mixer.init()
 pygame.mixer.music.load("sound\\BG_song.mp3")
 
+# Saved values
+with open("save.txt", 'r') as save_file:
+    file_content = save_file.readlines()
+    vol_percent = int(file_content[0])
+    total_players = int(file_content[1])
+
 # Volume
-with open("volume.txt", 'r') as vol_file:
-    vol_percent = int(vol_file.read())
 change_vol = False
 base_vol = 0.24
 muted = False
@@ -95,11 +96,18 @@ comp_total = 0
 user_batting = None
 first_innings = True
 memory = dict()
-TOTAL_WICKETS = 1
 user_wickets = 0
 comp_wickets = 0
 
 events = None
+
+def save_changes():
+    global vol_percent, total_players
+
+    lines = (str(vol_percent)+'\n', str(total_players))
+    # Save changes
+    with open("save.txt", 'w') as vol_file:
+        vol_file.writelines(lines)
 
 def reset():
     global user_batting, user_total, comp_total, first_innings, memory, events, user_wickets, comp_wickets
@@ -181,7 +189,7 @@ def draw():
     button("0", WIDTH-140, 350, 50, 50, RED, GREEN, lambda: get_input(0))
 
 def event_check():
-    global events
+    global events, full_screen
 
     for event in events:
             if event.type == pygame.QUIT:
@@ -193,7 +201,7 @@ def event_check():
 
 
 def toss():
-    global events, window, full_screen
+    global events, window
     value = random()
     start_time = time.time()
     while True:
@@ -231,7 +239,7 @@ def toss_result(ub):
     user_batting = ub
 
 def get_input(num):
-    global user_batting, user_total, comp_total, first_innings, memory, user_wickets, comp_wickets, TOTAL_WICKETS, full_screen
+    global user_batting, user_total, comp_total, first_innings, memory, user_wickets, comp_wickets, total_players, full_screen
     value = randint(0, 6)
     memory["comp_input"] = value
     if user_batting:
@@ -243,14 +251,14 @@ def get_input(num):
             user_wickets += 1
             display_out()
             if first_innings:
-                if user_wickets + 1 >= TOTAL_WICKETS:
+                if user_wickets + 1 >= total_players:
                     user_batting = False
                     first_innings = False
                     memory["user_total"] = user_total
             else:
-                if user_total == comp_total and user_wickets + 1 >= TOTAL_WICKETS:
+                if user_total == comp_total and user_wickets + 1 >= total_players:
                     memory["draw"] = True
-                elif user_total < comp_total and user_wickets + 1 >= TOTAL_WICKETS:
+                elif user_total < comp_total and user_wickets + 1 >= total_players:
                     memory["user_won"] = False
     else:
         if num != value:
@@ -261,18 +269,18 @@ def get_input(num):
             comp_wickets += 1
             display_out()
             if first_innings:
-                if comp_wickets + 1 >= TOTAL_WICKETS:
+                if comp_wickets + 1 >= total_players:
                     user_batting = True
                     first_innings = False
                     memory["comp_total"] = comp_total
             else:
-                if user_total == comp_total and comp_wickets + 1 >= TOTAL_WICKETS:
+                if user_total == comp_total and comp_wickets + 1 >= total_players:
                     memory["draw"] = True
-                elif user_total > comp_total and comp_wickets + 1 >= TOTAL_WICKETS:
+                elif user_total > comp_total and comp_wickets + 1 >= total_players:
                     memory["user_won"] = True
 
 def display_out():
-    global events, window, full_screen
+    global events, window
     start_time = time.time()
 
     while time.time() - start_time < 3:
@@ -293,7 +301,7 @@ def quit_game():
     sys.exit()
 
 def end_game(user_won, draw=False):
-    global events, window, full_screen
+    global events, window
     while True:
         events = pygame.event.get()
         event_check()
@@ -311,14 +319,15 @@ def end_game(user_won, draw=False):
         
         mute_buttons()
         
-        button("Play again!", WIDTH-150, HEIGHT-150, 100, 50, RED, GREEN, game)
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, RED, GREEN, game_intro)
         button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Play again!", WIDTH-390, HEIGHT-150, 100, 50, RED, GREEN, game)
 
         pygame.display.update()
         clock.tick(15)
 
 def mid_game(runs, user_batting):
-    global events, window, full_screen
+    global events, window
     i = 0
     while True:
         events = pygame.event.get()
@@ -378,8 +387,9 @@ def update():
                 end_game(False, True)  
                 break
 
+
 def set_vol():
-    global events, window, full_screen, vol_percent, change_vol, muted
+    global events, window, vol_percent, change_vol, muted
 
     vol_bar_x = (WIDTH//2) - 60
     vol_bar_y = (HEIGHT//2) - 150
@@ -413,25 +423,52 @@ def set_vol():
         button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
         button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
         button("Back", WIDTH-390, HEIGHT-150, 100, 50, GREEN, RED, settings)
-        # Create back button
 
         if change_vol and not muted:
             pygame.mixer.music.set_volume(base_vol * vol_percent / 100)
-            # Save changes
-            with open("volume.txt", 'w') as vol_file:
-                vol_file.write(str(vol_percent))
+            save_changes()
             change_vol = False
 
         pygame.display.update()
         clock.tick(15)
 
-def set_wickets():
-    global events, window, full_screen
+def change_players(val):
+    global total_players
 
-    pass
+    total_players = val
+    save_changes()
+
+def set_players():
+    global events, window, total_players
+
+    avail_players = [1, 5, 11]
+
+    while True:
+        events = pygame.event.get()
+        event_check()
+
+        window.blit(settings_img, (0, 0))
+        mute_buttons()
+
+        nol = 0  # NO OF LOOPS
+        for i in avail_players:
+            nol += 1
+            text_objects(str(i), score_font, YELLOW, (WIDTH//2+50, (HEIGHT//2-32)+(nol*40)))
+            if total_players == i:
+                button("", WIDTH//2, (HEIGHT//2-40)+(nol*40), 15, 15, RED, RED)
+                continue
+            button("", WIDTH//2, (HEIGHT//2-40)+(nol*40), 15, 15, WHITE, WHITE, lambda: change_players(i))
+
+        button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
+        button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
+        button("Back", WIDTH-390, HEIGHT-150, 100, 50, GREEN, RED, settings)
+
+        pygame.display.update()
+        clock.tick(15)
+
 
 def settings():
-    global events, window, full_screen
+    global events, window
 
     while True:
         events = pygame.event.get()
@@ -441,7 +478,7 @@ def settings():
         mute_buttons()
         
         button("Volume", (WIDTH//2) -50, (HEIGHT//2) - 120, 100, 50, YELLOW, GREEN, set_vol)
-        button("Wickets", (WIDTH//2) - 50, (HEIGHT//2) - 60, 100, 50, YELLOW, GREEN, set_wickets)
+        button("Players", (WIDTH//2) - 50, (HEIGHT//2) - 60, 100, 50, YELLOW, GREEN, set_players)
 
         button("Home", WIDTH-150, HEIGHT-150, 100, 50, GREEN, RED, game_intro) 
         button("EXIT", WIDTH-270, HEIGHT-150, 100, 50, GREEN, RED, quit_game)
@@ -451,7 +488,7 @@ def settings():
 
 
 def game_loop():
-    global memory, events, user_batting, window, full_screen
+    global memory, events, user_batting, window
     memory = dict()
     start_time = time.time()
     img_count = 0
@@ -487,7 +524,7 @@ def game_loop():
         clock.tick(15)
 
 def game_intro():
-    global events, window, full_screen, vol_percent
+    global events, window, vol_percent
     start_time = time.time()
     img_count = 0
     intro = True
